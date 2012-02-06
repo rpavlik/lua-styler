@@ -35,6 +35,9 @@ end
 
 local blockOpen = Set{
 	"{",
+	"then",
+	"else",
+	"elseif",
 	"do",
 	"function",
 	"repeat",
@@ -44,6 +47,8 @@ local blockOpen = Set{
 
 local blockClose = Set{
 	"}",
+	"else",
+	"elseif",
 	"end",
 	"until",
 	")",
@@ -51,37 +56,34 @@ local blockClose = Set{
 
 local function processCode(text)
 	local level = 0
-	local needsNewline = false
+	local startingNewline = true
 	local ret = {}
 	local function output(text)
-		if not needsNewline then
+		if blockClose[text] then
+			level = level - 1
+			print("Closing a block", text, level)
+		end
+		if not startingNewline then
 			table.insert(ret, text)
-		else 
-			if blockClose[text] then
-				level = level - 1
-			end
-			table.insert(ret, "\n")
+		else
 			table.insert(ret, indent(level))
 			table.insert(ret, text)
-			needsNewline = false
-			if blockOpen[text] then
-				level = level + 1
-			end
+			startingNewline = false
+		end
+		if blockOpen[text] then
+			level = level + 1
+			print("Opening a block", text, level)
 		end
 	end
 	
 	local kinds = {
 		whitespace = function(text, lnum, cnum)
 			if hasNewline(text) then
-				if needsNewline then
-					table.insert(ret, "\n")
-					-- still needs newline
-				else
-					needsNewline = true
-				end
-			else
+				table.insert(ret, "\n")
+				startingNewline = true
+			elseif not startingNewline then
 				output " "
-			end		
+			end
 		end,
 	}
 	
