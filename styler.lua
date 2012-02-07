@@ -78,7 +78,8 @@ local function processCode(text)
 	local kinds = {
 		whitespace = function(text, lnum, cnum)
 			if hasNewline(text) then
-				buffer "\n"
+				-- Extract and buffer all and only the newlines
+				buffer(text:gsub("[^\n]*(\n)[^\n]*","%1"))
 				startingNewline = true
 			elseif not startingNewline then
 				output " "
