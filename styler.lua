@@ -170,16 +170,18 @@ do -- addPadding
 
 		local function paddingFilter(self)
 			local text = self.text
-			local token = text
-			if padBoth[token] then
-				vverbose("Padding both:", token)
-				text = " " .. text .. " "
-			elseif padBefore[token] then
-				vverbose("Padding before:", token)
-				text = " " .. text
-			elseif padAfter[token] then
-				vverbose("Padding after:", token)
-				text = text .. " "
+			if self.kind == "keyword" or self.kind == "operator" then
+				local token = text
+				if padBoth[token] then
+					vverbose("Padding both:", token)
+					text = " " .. text .. " "
+				elseif padBefore[token] then
+					vverbose("Padding before:", token)
+					text = " " .. text
+				elseif padAfter[token] then
+					vverbose("Padding after:", token)
+					text = text .. " "
+				end
 			end
 			self.buffer(text)
 		end
