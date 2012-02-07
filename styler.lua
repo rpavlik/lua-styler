@@ -1,8 +1,7 @@
 #!/usr/bin/env lua
 
---require "luarocks.loader"
-require "lxsh.init"
-require "lxsh.lexers.lua"
+require "luarocks.loader"
+require "lxsh"
 
 
 local indent = function(level)
