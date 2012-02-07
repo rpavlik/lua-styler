@@ -97,8 +97,51 @@ function _M.reindentBlocks(text, verbose, vverbose)
 	return table.concat(ret)
 end
 
-function _M.addPadding(text, verbose, vverbose)
+local padBoth = Set{
+	"=",
+	"==",
+	"~=",
+	"<",
+	">",
+	"+",
+	"-",
+	"*",
+	"/",
+	"^",
+	"%",
+	".."
+}
 
+local padBefore = Set{
+}
+
+local padAfter = Set{
+	",",
+	";",
+}
+
+function _M.addPadding(text, verbose, vverbose)
+	local ret = {}
+	local function output(text)
+		table.insert(ret, text)
+	end
+	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
+		local token = text
+		if padBoth[token] then
+			vverbose("Padding both:", token)
+			text = " " .. text .. " "
+		end
+		if padBefore[token] then
+			vverbose("Padding before:", token)
+			text = " " .. text
+		end
+		if padAfter[token] then
+			vverbose("Padding after:", token)
+			text = text .. " "
+		end
+		output(text)
+	end
+	return table.concat(ret)
 end
 
 function _M.processCode(text, verbose_print, vverbose_print)
@@ -106,6 +149,7 @@ function _M.processCode(text, verbose_print, vverbose_print)
 	local vverbose = vverbose_print or verbose
 	
 	local config = {
+		"addPadding",
 		"reindentBlocks"
 	}
 	
