@@ -8,7 +8,9 @@ else
  
 local z = function() print "hats" end
 function morehats()
+-- first column comment
 print "lots and lots"
+	-- Indented comment
 		print "of hats"
 		end
 		
