@@ -173,6 +173,23 @@ do -- addPadding
 	end
 end
 
+do -- eatPrecedingWhitespace
+	local eatsPrecedingWS = Set{
+		",",
+		";",
+	}
+
+	function _M.eatPrecedingWhitespace(text, verbose, vverbose)
+		local function eatPrecedingFilter(self)
+			if eatsPrecedingWS[self.text] then
+				local preceding = self.popBuffer()
+				if not (lxsh.lexers.lua.patterns.whitespace:match(preceding) and preceding ~= "\n") then
+					self.buffer(preceding)
+				end
+				self.buffer(self.text)
+			end
+		end
+	end
 end
 
 function _M.removeDosEndlines(text, verbose, vverbose)
@@ -193,7 +210,9 @@ function _M.processCode(text, verbose_print, vverbose_print)
 	local config = {
 		"removeDosEndlines",
 		"addPadding",
-		"reindentBlocks"
+		"reindentBlocks",
+		--"eatPrecedingWhitespace",
+		--"reindentBlocks",
 	}
 
 	local ret = text
