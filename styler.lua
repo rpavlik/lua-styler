@@ -120,6 +120,17 @@ local padAfter = Set{
 	";",
 }
 
+local function filterTokens(text, filter)
+	local ret = {}
+	local function output(text)
+		table.insert(ret, text)
+	end
+	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
+		filter({output = output, kind = kind, text = text, lnum = lnum, cnum = cnum})
+	end
+	return table.concat(ret)
+end
+
 function _M.addPadding(text, verbose, vverbose)
 	local ret = {}
 	local function output(text)
@@ -144,11 +155,23 @@ function _M.addPadding(text, verbose, vverbose)
 	return table.concat(ret)
 end
 
+function _M.removeDosEndlines(text, verbose, vverbose)
+	local function handleToken(self)
+		if self.type == "whitespace" then
+			self.output(self.text:gsub("\r", ""))
+		else
+			self.output(self.text)
+		end
+	end
+	return filterTokens(text, handleToken)
+end
+
 function _M.processCode(text, verbose_print, vverbose_print)
 	local verbose = verbose_print or print
 	local vverbose = vverbose_print or verbose
 
 	local config = {
+		"removeDosEndlines",
 		"addPadding",
 		"reindentBlocks"
 	}
