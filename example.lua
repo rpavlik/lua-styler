@@ -1,12 +1,12 @@
  x   = 5
 
-if x > 5 then
+if x >5 then
 print "Whoopie!"
 else
  print "noooo"
  end
  
-local z = function() print "hats" end
+local z=function() print "hats" end
 function morehats()
 -- first column comment
 print "lots and lots"
@@ -23,3 +23,5 @@ d = function()
 	print "function in a table!"
 	end,
 }
+
+z(a,b,c)
