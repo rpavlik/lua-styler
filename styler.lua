@@ -28,7 +28,7 @@ local blockOpen = Set{
 	"function",
 	"repeat",
 	"while",
-	"("	
+	"("
 }
 
 local blockClose = Set{
@@ -44,14 +44,22 @@ local function processCode(text)
 	local level = 0
 	local startingNewline = true
 	local ret = {}
+
+	local function verbose(...)
+		print(...)
+	end
+	local function vverbose(...)
+		verbose(...)
+	end
+
 	local function buffer(text)
-		print(("Buffering %q"):format(text))
+		vverbose(("Buffering %q"):format(text))
 		table.insert(ret, text)
 	end
 	local function output(text)
 		if blockClose[text] then
 			level = level - 1
-			print("Closing a block", text, level)
+			verbose("Closing a block", text, level)
 		end
 		if not startingNewline then
 			buffer(text)
@@ -61,12 +69,12 @@ local function processCode(text)
 		end
 		if blockOpen[text] then
 			level = level + 1
-			print("Opening a block", text, level)
+			verbose("Opening a block", text, level)
 		end
 
 		startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
 	end
-	
+
 	local kinds = {
 		whitespace = function(text, lnum, cnum)
 			if hasNewline(text) then
@@ -77,12 +85,12 @@ local function processCode(text)
 			end
 		end,
 	}
-	
+
 	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
 		if kinds[kind] then
 			kinds[kind](text, lnum, cnum)
 		else
-			print("No special treatment for", kind)
+			vverbose("No special treatment for", kind)
 			output(text)
 		end
 	end
