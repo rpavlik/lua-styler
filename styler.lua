@@ -108,4 +108,10 @@ end
 local f = assert(io.open(arg[1], 'r'))
 local orig = f:read("*all")
 f:close()
-print(processCode(orig))
+local ret = processCode(orig)
+print(ret)
+
+local f = assert(io.open(arg[1]..".styled", 'w'))
+f:write(ret)
+f:close()
+
