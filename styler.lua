@@ -83,6 +83,7 @@ local function processCode(text)
 		if kinds[kind] then
 			kinds[kind](text, lnum, cnum)
 		else
+			print("No special treatment for", kind)
 			output(text)
 		end
 	end
