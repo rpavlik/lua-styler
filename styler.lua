@@ -45,28 +45,33 @@ local function processCode(text)
 	local level = 0
 	local startingNewline = true
 	local ret = {}
+	local function buffer(text)
+		print(("Buffering %q"):format(text))
+		table.insert(ret, text)
+	end
 	local function output(text)
 		if blockClose[text] then
 			level = level - 1
 			print("Closing a block", text, level)
 		end
 		if not startingNewline then
-			table.insert(ret, text)
+			buffer(text)
 		else
-			table.insert(ret, indent(level))
-			table.insert(ret, text)
-			startingNewline = false
+			buffer(indent(level))
+			buffer(text)
 		end
 		if blockOpen[text] then
 			level = level + 1
 			print("Opening a block", text, level)
 		end
+
+		startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
 	end
 	
 	local kinds = {
 		whitespace = function(text, lnum, cnum)
 			if hasNewline(text) then
-				table.insert(ret, "\n")
+				buffer "\n"
 				startingNewline = true
 			elseif not startingNewline then
 				output " "
