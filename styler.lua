@@ -148,8 +148,9 @@ do -- addPadding
 		"^",
 		"%",
 		"..",
-		"and",
-		"or",
+		--[["and",
+		"or", -- buggy in current lxsh
+		]]
 	}
 
 	local padBefore = Set{
@@ -163,7 +164,9 @@ do -- addPadding
 		"then",
 		"else",
 		"elseif",
-		"not"
+		--[[
+		"not" -- buggy in current lxsh
+		]]
 	}
 
 	function _M.addPadding(text, verbose, vverbose)
