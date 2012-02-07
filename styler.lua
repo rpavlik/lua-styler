@@ -16,16 +16,29 @@ local hasNewline = function(whitespace)
 	return whitespace:find("\n", 1, true) ~= nil
 end
 
-local function filterTokens(input, filter)
+-- Utility function to process a string token by token, building up a new
+-- string using a table as a buffer.
+local function filterTokens(input, filter, setup)
 	local ret = {}
-	local function buffer(s)
-		table.insert(ret, s)
+
+	local common = {
+		buffer = function(s)
+			table.insert(ret, s)
+		end,
+		popBuffer = function ()
+			return table.remove(ret)
+		end,
+		getBufferSize = function ()
+			return #ret
+		end,
+	}
+
+	if setup then
+		setup(common)
 	end
-	local function popBuffer()
-		return table.remove(ret)
-	end
+	local mt = {__index = common}
 	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(input) do
-		filter({buffer = buffer, popBuffer = popBuffer, kind = kind, text = text, lnum = lnum, cnum = cnum})
+		filter(setmetatable({kind = kind, text = text, lnum = lnum, cnum = cnum}, mt))
 	end
 	return table.concat(ret)
 end
