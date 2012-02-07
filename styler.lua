@@ -21,14 +21,22 @@ end
 local function filterTokens(input, filter, setup)
 	local ret = {}
 
+	local function nilToEmptyString(s)
+		if s == nil then
+			return ""
+		else
+			return s
+		end
+	end
 	local common = {
 		buffer = function(s)
 			table.insert(ret, s)
 		end,
-		popBuffer = function ()
-			return table.remove(ret)
+		popBuffer = function()
+			return nilToEmptyString(table.remove(ret))
 		end,
-		getBufferSize = function ()
+
+		getBufferSize = function()
 			return #ret
 		end,
 	}
