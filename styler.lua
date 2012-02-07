@@ -76,7 +76,13 @@ do -- block indenter/whitespace minimizer
 		local level = 0
 		local startingNewline = true
 
-		local function output(text, buffer)
+		local buffer
+
+		local function setup(common)
+			buffer = common.buffer
+		end
+
+		local function output(text)
 			if blockClose[text] then
 				level = level - 1
 				verbose("Closing a block", text, level)
@@ -95,23 +101,21 @@ do -- block indenter/whitespace minimizer
 		end
 
 		local function blockIndenter(self)
-			local buffer = self.buffer
-			local text = self.text
 			if self.kind == "whitespace" then
 				if hasNewline(self.text) then
 					-- Extract and buffer all and only the newlines
 					buffer(self.text:gsub("[^\n]*(\n)[^\n]*", "%1"))
 					startingNewline = true
 				elseif not startingNewline then
-					output(" ", buffer)
+					output " "
 				end
 			else
 				vverbose("No special treatment for", self.kind)
-				output(text, buffer)
+				output(self.text)
 			end
 		end
 
-		return filterTokens(text, blockIndenter)
+		return filterTokens(text, blockIndenter, setup)
 	end
 
 end
