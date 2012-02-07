@@ -71,7 +71,7 @@ if #inputFiles < 1 then
 end
 
 local function handleFile(fn)
-	local f = assert(io.open(fn, 'r'))
+	local f = assert(io.open(fn, 'rb'))
 	local orig = f:read("*all")
 	f:close()
 
@@ -81,11 +81,11 @@ local function handleFile(fn)
 		script_verbose(fn, "Already cleanly styled!")
 	else
 		if makeBackup then
-			local fbak = assert(io.open(fn .. ".bak", "w"))
+			local fbak = assert(io.open(fn .. ".bak", "wb"))
 			fbak:write(orig)
 			fbak:close()
 		end
-		local f = assert(io.open(fn, 'w'))
+		local f = assert(io.open(fn, 'wb'))
 		f:write(styledCode)
 		f:close()
 		script_verbose(fn, "Style cleanup changes applied.")
