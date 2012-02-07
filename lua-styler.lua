@@ -56,7 +56,7 @@ options["--help"] = options["-h"]
 
 --[[ Process arguments ]]
 local inputFiles = {}
-for _, v in ipairs(arg) do
+for _, v in ipairs(arg or {}) do
 	if options[v] ~= nil then
 		options[v].action()
 	else
