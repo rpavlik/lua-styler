@@ -11,6 +11,41 @@ local verbose_func = donothing
 
 local script_verbose = print
 
+--[[ Worker functions ]]
+local function overwriteFile(fn, orig, styledCode)
+	if makeBackup then
+		local fbak = assert(io.open(fn .. ".bak", "wb"))
+		fbak:write(orig)
+		fbak:close()
+	end
+	local f = assert(io.open(fn, 'wb'))
+	f:write(styledCode)
+	f:close()
+end
+
+local function displayOnly(fn, orig, styledCode)
+	print(styledCode)
+end
+
+
+local function handleFile(fn)
+	local f = assert(io.open(fn, 'rb'))
+	local orig = f:read("*all")
+	f:close()
+
+	local styledCode = styler.processCode(orig, verbose_func, vverbose_func)
+
+	if styledCode == orig then
+		script_verbose(fn, "Already cleanly styled!")
+	else
+		outputResults(fn, orig, styledCode)
+		script_verbose(fn, "Style cleanup changes applied.")
+	end
+end
+
+
+local outputResults = overwriteFile
+
 --[[ Options and Help ]]
 
 local script_info = [[
@@ -36,6 +71,10 @@ local options = {
 	["-q"] = {
 		help = "Silence all non-error output from the styler procedure and the main script.",
 		action = function() vverbose_func = donothing; verbose_func = donothing; script_verbose = donothing end
+	},
+	["-n"] = {
+		help = "Dry-run: print results at the end instead of replacing the file.",
+		action = function() outputResults = displayOnly end
 	}
 }
 
@@ -70,27 +109,7 @@ if #inputFiles < 1 then
 	os.exit(1)
 end
 
-local function handleFile(fn)
-	local f = assert(io.open(fn, 'rb'))
-	local orig = f:read("*all")
-	f:close()
 
-	local styledCode = styler.processCode(orig, verbose_func, vverbose_func)
-
-	if styledCode == orig then
-		script_verbose(fn, "Already cleanly styled!")
-	else
-		if makeBackup then
-			local fbak = assert(io.open(fn .. ".bak", "wb"))
-			fbak:write(orig)
-			fbak:close()
-		end
-		local f = assert(io.open(fn, 'wb'))
-		f:write(styledCode)
-		f:close()
-		script_verbose(fn, "Style cleanup changes applied.")
-	end
-end
 
 for _, fn in ipairs(inputFiles) do
 	handleFile(fn)
