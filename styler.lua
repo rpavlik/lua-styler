@@ -39,6 +39,10 @@ local function filterTokens(input, filter, setup)
 		getBufferSize = function()
 			return #ret
 		end,
+
+		peekBuffer = function()
+			return nilToEmptyString(ret[#ret])
+		end
 	}
 
 	if setup then
