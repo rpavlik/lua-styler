@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-pcall(require,"luarocks.loader")
+pcall(require, "luarocks.loader")
 require "styler"
 
 local makeBackup = true
