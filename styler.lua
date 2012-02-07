@@ -1,5 +1,5 @@
 
-pcall(require,"luarocks.loader")
+pcall(require, "luarocks.loader")
 
 -- This weird construct handles a bug in luarocks and/or lxsh's rockspec.
 local success = pcall(require, "lxsh")
@@ -78,7 +78,7 @@ function _M.reindentBlocks(text, verbose, vverbose)
 		whitespace = function(text, lnum, cnum)
 			if hasNewline(text) then
 				-- Extract and buffer all and only the newlines
-				buffer(text:gsub("[^\n]*(\n)[^\n]*","%1"))
+				buffer(text:gsub("[^\n]*(\n)[^\n]*", "%1"))
 				startingNewline = true
 			elseif not startingNewline then
 				output " "
@@ -147,14 +147,15 @@ end
 function _M.processCode(text, verbose_print, vverbose_print)
 	local verbose = verbose_print or print
 	local vverbose = vverbose_print or verbose
-	
+
 	local config = {
 		"addPadding",
 		"reindentBlocks"
 	}
-	
+
 	local ret = text
 	for _, filter in ipairs(config) do
+		verbose("Applying filter:", filter)
 		ret = _M[filter](ret, verbose, vverbose)
 	end
 	return ret
@@ -165,7 +166,7 @@ end
 -- global variable and bypass strict.lua because "we know what we're doing"
 -- (in other words, "lua -lstyler" is very convenient).
 if not rawget(_G, 'styler') then
-  rawset(_G, 'styler', _M)
+	rawset(_G, 'styler', _M)
 end
 
 return _M
