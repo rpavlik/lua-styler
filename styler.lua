@@ -157,7 +157,7 @@ end
 
 function _M.removeDosEndlines(text, verbose, vverbose)
 	local function handleToken(self)
-		if self.type == "whitespace" then
+		if self.type == "whitespace" or self.type == "comment" then
 			self.output(self.text:gsub("\r", ""))
 		else
 			self.output(self.text)
