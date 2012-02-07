@@ -50,121 +50,125 @@ local Set = function(args)
 	return args
 end
 
-local blockOpen = Set{
-	"{",
-	"then",
-	"else",
-	"do",
-	"function",
-	"repeat",
-	"("
-}
-
-local blockClose = Set{
-	"}",
-	"else",
-	"elseif",
-	"end",
-	"until",
-	")",
-}
-
-
 local _M = {}
 
-function _M.reindentBlocks(text, verbose, vverbose)
-	local level = 0
-	local startingNewline = true
+do -- block indenter/whitespace minimizer
+	local blockOpen = Set{
+		"{",
+		"then",
+		"else",
+		"do",
+		"function",
+		"repeat",
+		"("
+	}
 
-	local function output(text, buffer)
-		if blockClose[text] then
-			level = level - 1
-			verbose("Closing a block", text, level)
-		end
-		if not startingNewline then
-			buffer(text)
-		else
-			buffer(indent(level))
-			buffer(text)
-		end
-		if blockOpen[text] then
-			level = level + 1
-			verbose("Opening a block", text, level)
-		end
-		startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
-	end
+	local blockClose = Set{
+		"}",
+		"else",
+		"elseif",
+		"end",
+		"until",
+		")",
+	}
 
-	local function blockIndenter(self)
-		local buffer = self.buffer
-		local text = self.text
-		if self.kind == "whitespace" then
-			if hasNewline(self.text) then
-				-- Extract and buffer all and only the newlines
-				buffer(self.text:gsub("[^\n]*(\n)[^\n]*", "%1"))
-				startingNewline = true
-			elseif not startingNewline then
-				output(" ", buffer)
+	function _M.reindentBlocks(text, verbose, vverbose)
+		local level = 0
+		local startingNewline = true
+
+		local function output(text, buffer)
+			if blockClose[text] then
+				level = level - 1
+				verbose("Closing a block", text, level)
 			end
-		else
-			vverbose("No special treatment for", self.kind)
-			output(text, buffer)
+			if not startingNewline then
+				buffer(text)
+			else
+				buffer(indent(level))
+				buffer(text)
+			end
+			if blockOpen[text] then
+				level = level + 1
+				verbose("Opening a block", text, level)
+			end
+			startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
 		end
+
+		local function blockIndenter(self)
+			local buffer = self.buffer
+			local text = self.text
+			if self.kind == "whitespace" then
+				if hasNewline(self.text) then
+					-- Extract and buffer all and only the newlines
+					buffer(self.text:gsub("[^\n]*(\n)[^\n]*", "%1"))
+					startingNewline = true
+				elseif not startingNewline then
+					output(" ", buffer)
+				end
+			else
+				vverbose("No special treatment for", self.kind)
+				output(text, buffer)
+			end
+		end
+
+		return filterTokens(text, blockIndenter)
 	end
 
-	return filterTokens(text, blockIndenter)
 end
 
-local padBoth = Set{
-	"=",
-	"==",
-	"~=",
-	"<",
-	">",
-	"+",
-	"-",
-	"*",
-	"/",
-	"^",
-	"%",
-	".."
-}
+do -- addPadding
+	local padBoth = Set{
+		"=",
+		"==",
+		"~=",
+		"<",
+		">",
+		"+",
+		"-",
+		"*",
+		"/",
+		"^",
+		"%",
+		".."
+	}
 
-local padBefore = Set{
-	"end"
-}
+	local padBefore = Set{
+		"end"
+	}
 
-local padAfter = Set{
-	",",
-	";",
-	"if",
-	"then",
-	"else",
-	"elseif",
-}
+	local padAfter = Set{
+		",",
+		";",
+		"if",
+		"then",
+		"else",
+		"elseif",
+	}
 
+	function _M.addPadding(text, verbose, vverbose)
 
-
-function _M.addPadding(text, verbose, vverbose)
-
-	local function paddingFilter(self)
-		local text = self.text
-		local token = text
-		if padBoth[token] then
-			vverbose("Padding both:", token)
-			text = " " .. text .. " "
+		local function paddingFilter(self)
+			local text = self.text
+			local token = text
+			if padBoth[token] then
+				vverbose("Padding both:", token)
+				text = " " .. text .. " "
+			end
+			if padBefore[token] then
+				vverbose("Padding before:", token)
+				text = " " .. text
+			end
+			if padAfter[token] then
+				vverbose("Padding after:", token)
+				text = text .. " "
+			end
+			self.buffer(text)
 		end
-		if padBefore[token] then
-			vverbose("Padding before:", token)
-			text = " " .. text
-		end
-		if padAfter[token] then
-			vverbose("Padding after:", token)
-			text = text .. " "
-		end
-		self.buffer(text)
+
+		return filterTokens(text, paddingFilter)
 	end
+end
 
-	return filterTokens(text, paddingFilter)
 end
 
 function _M.removeDosEndlines(text, verbose, vverbose)
