@@ -227,8 +227,8 @@ function _M.processCode(text, verbose_print, vverbose_print)
 		"removeDosEndlines",
 		"addPadding",
 		"reindentBlocks",
-		--"eatPrecedingWhitespace",
-		--"reindentBlocks",
+		"eatPrecedingWhitespace",
+		"reindentBlocks",
 	}
 
 	local ret = text
