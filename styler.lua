@@ -4,8 +4,15 @@ require "styler"
 
 local makeBackup = true
 
+local donothing = function() end
+local vverbose_func = donothing
+local verbose_func = nil
+
 local options = {
 	["--nobackup"] = function() makeBackup = false end,
+	["-vv"] = function() vverbose_func = nil end,
+	["-q"] = function() vverbose_func = donothing; verbose_func = donothing; end,
+
 }
 
 local inputFiles = {}
@@ -28,7 +35,7 @@ local function handleFile(fn)
 	local orig = f:read("*all")
 	f:close()
 
-	local styledCode = styler.processCode(orig)
+	local styledCode = styler.processCode(orig, verbose_func, vverbose_func)
 
 	if styledCode == orig then
 		print(fn, "Already cleanly styled!")
