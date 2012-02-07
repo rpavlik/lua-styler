@@ -21,7 +21,7 @@ build = {
   },
   install = {
     bin = {
-      "styler.lua"
+      "lua-styler.lua"
     }
   },
   copy_directories = { --[["samples", "doc", "tests" ]]},
