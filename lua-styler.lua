@@ -27,6 +27,7 @@ local function displayOnly(fn, orig, styledCode)
 	print(styledCode)
 end
 
+local outputResults = overwriteFile
 
 local function handleFile(fn)
 	local f = assert(io.open(fn, 'rb'))
@@ -44,7 +45,6 @@ local function handleFile(fn)
 end
 
 
-local outputResults = overwriteFile
 
 --[[ Options and Help ]]
 
