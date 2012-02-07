@@ -24,7 +24,6 @@ local blockOpen = Set{
 	"{",
 	"then",
 	"else",
-	"elseif",
 	"do",
 	"function",
 	"repeat",
