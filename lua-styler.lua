@@ -58,7 +58,7 @@ options["--help"] = options["-h"]
 local inputFiles = {}
 for _, v in ipairs(arg) do
 	if options[v] ~= nil then
-		options[v]()
+		options[v].action()
 	else
 		table.insert(inputFiles, v)
 	end
