@@ -84,7 +84,7 @@ local function handleFile(fn)
 			fbak:write(orig)
 			fbak:close()
 		end
-		local f = assert(io.open(fn..".styled", 'w'))
+		local f = assert(io.open(fn, 'w'))
 		f:write(styledCode)
 		f:close()
 		script_verbose(fn, "Style cleanup changes applied.")
