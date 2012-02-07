@@ -51,7 +51,7 @@ local outputResults = overwriteFile
 local script_info = [[
 Lua Styler - reformats Lua code.
 
-Usage: styler [options] filename(s)...
+Usage: lua-styler [options] filename(s)...
 
 ]]
 
