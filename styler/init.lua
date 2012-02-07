@@ -25,7 +25,6 @@ local blockOpen = Set{
 	"do",
 	"function",
 	"repeat",
-	"while",
 	"("
 }
 
