@@ -139,13 +139,17 @@ do -- addPadding
 		"~=",
 		"<",
 		">",
+		"<=",
+		">=",
 		"+",
 		"-",
 		"*",
 		"/",
 		"^",
 		"%",
-		".."
+		"..",
+		"and",
+		"or",
 	}
 
 	local padBefore = Set{
@@ -159,6 +163,7 @@ do -- addPadding
 		"then",
 		"else",
 		"elseif",
+		"not"
 	}
 
 	function _M.addPadding(text, verbose, vverbose)
