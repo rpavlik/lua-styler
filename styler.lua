@@ -112,7 +112,7 @@ function _M.processCode(text, verbose_print, vverbose_print)
 	for _, filter in ipairs(config) do
 		ret = _M[filter](ret, verbose, vverbose)
 	end
-	
+	return ret
 end
 
 
