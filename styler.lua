@@ -132,11 +132,9 @@ local function filterTokens(text, filter)
 end
 
 function _M.addPadding(text, verbose, vverbose)
-	local ret = {}
-	local function output(text)
-		table.insert(ret, text)
-	end
-	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
+
+	local function paddingFilter(self)
+		local text = self.text
 		local token = text
 		if padBoth[token] then
 			vverbose("Padding both:", token)
@@ -150,9 +148,10 @@ function _M.addPadding(text, verbose, vverbose)
 			vverbose("Padding after:", token)
 			text = text .. " "
 		end
-		output(text)
+		self.output(text)
 	end
-	return table.concat(ret)
+
+	return filterTokens(text, paddingFilter)
 end
 
 function _M.removeDosEndlines(text, verbose, vverbose)
