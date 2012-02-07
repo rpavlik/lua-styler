@@ -16,6 +16,20 @@ local hasNewline = function(whitespace)
 	return whitespace:find("\n", 1, true) ~= nil
 end
 
+local function filterTokens(input, filter)
+	local ret = {}
+	local function buffer(s)
+		table.insert(ret, s)
+	end
+	local function popBuffer()
+		return table.remove(ret)
+	end
+	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(input) do
+		filter({buffer = buffer, popBuffer = popBuffer, kind = kind, text = text, lnum = lnum, cnum = cnum})
+	end
+	return table.concat(ret)
+end
+
 local Set = function(args)
 	for _, v in ipairs(args) do
 		args[v] = true
@@ -48,14 +62,8 @@ local _M = {}
 function _M.reindentBlocks(text, verbose, vverbose)
 	local level = 0
 	local startingNewline = true
-	local ret = {}
 
-
-	local function buffer(text)
-		vverbose(("Buffering %q"):format(text))
-		table.insert(ret, text)
-	end
-	local function output(text)
+	local function output(text, buffer)
 		if blockClose[text] then
 			level = level - 1
 			verbose("Closing a block", text, level)
@@ -70,31 +78,27 @@ function _M.reindentBlocks(text, verbose, vverbose)
 			level = level + 1
 			verbose("Opening a block", text, level)
 		end
-
 		startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
 	end
 
-	local kinds = {
-		whitespace = function(text, lnum, cnum)
-			if hasNewline(text) then
+	local function blockIndenter(self)
+		local buffer = self.buffer
+		local text = self.text
+		if self.kind == "whitespace" then
+			if hasNewline(self.text) then
 				-- Extract and buffer all and only the newlines
-				buffer(text:gsub("[^\n]*(\n)[^\n]*", "%1"))
+				buffer(self.text:gsub("[^\n]*(\n)[^\n]*", "%1"))
 				startingNewline = true
 			elseif not startingNewline then
-				output " "
+				output(" ", buffer)
 			end
-		end,
-	}
-
-	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
-		if kinds[kind] then
-			kinds[kind](text, lnum, cnum)
 		else
-			vverbose("No special treatment for", kind)
-			output(text)
+			vverbose("No special treatment for", self.kind)
+			output(text, buffer)
 		end
 	end
-	return table.concat(ret)
+
+	return filterTokens(text, blockIndenter)
 end
 
 local padBoth = Set{
@@ -125,16 +129,7 @@ local padAfter = Set{
 	"elseif",
 }
 
-local function filterTokens(text, filter)
-	local ret = {}
-	local function output(text)
-		table.insert(ret, text)
-	end
-	for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(text) do
-		filter({output = output, kind = kind, text = text, lnum = lnum, cnum = cnum})
-	end
-	return table.concat(ret)
-end
+
 
 function _M.addPadding(text, verbose, vverbose)
 
@@ -153,7 +148,7 @@ function _M.addPadding(text, verbose, vverbose)
 			vverbose("Padding after:", token)
 			text = text .. " "
 		end
-		self.output(text)
+		self.buffer(text)
 	end
 
 	return filterTokens(text, paddingFilter)
@@ -162,9 +157,9 @@ end
 function _M.removeDosEndlines(text, verbose, vverbose)
 	local function handleToken(self)
 		if self.type == "whitespace" or self.type == "comment" then
-			self.output(self.text:gsub("\r", ""))
+			self.buffer(self.text:gsub("\r", ""))
 		else
-			self.output(self.text)
+			self.buffer(self.text)
 		end
 	end
 	return filterTokens(text, handleToken)
