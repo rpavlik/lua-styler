@@ -194,13 +194,17 @@ do -- eatPrecedingWhitespace
 	function _M.eatPrecedingWhitespace(text, verbose, vverbose)
 		local function eatPrecedingFilter(self)
 			if eatsPrecedingWS[self.text] then
-				local preceding = self.popBuffer()
-				if not (lxsh.lexers.lua.patterns.whitespace:match(preceding) and preceding ~= "\n") then
-					self.buffer(preceding)
+				local preceding = self.peekBuffer()
+				-- look at preceding token
+				if lxsh.lexers.lua.patterns.whitespace:match(preceding) and preceding ~= "\n" then
+					-- if it's whitespace and not a newline, pop it.
+					self.popBuffer()
 				end
-				self.buffer(self.text)
 			end
+			-- In any case, buffer this token.
+			self.buffer(self.text)
 		end
+		return filterTokens(text, eatPrecedingFilter)
 	end
 end
 
