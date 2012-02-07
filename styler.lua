@@ -4,14 +4,6 @@
 require "lxsh.init"
 require "lxsh.lexers.lua"
 
-if #arg ~= 1 then
-	print "Must provide a file name."
-	os.exit(1)
-end
-
-local f = assert(io.open(arg[1], 'r'))
-local orig = f:read("*all")
-f:close()
 
 local indent = function(level)
 	return ("\t"):rep(level)
@@ -20,11 +12,6 @@ end
 local hasNewline = function(whitespace)
 	return whitespace:find("\n", 1, true) ~= nil
 end
-
-local kindHandler = {
-	level = 0,
-	needsNewline = false,
-}
 
 local Set = function(args)
 	for _, v in ipairs(args) do
@@ -96,53 +83,15 @@ local function processCode(text)
 	end
 	return table.concat(ret)
 end
---[[
-	
-	
-kindHandler.processString = function(self, text)
-	if not self.needsNewline then
-		return text
-	else
-		if blockClose[text] then
-			self.level = self.level - 1
-		end
-		local ret = indent(self.level) .. text
-		self.needsNewline = false
-		if blockOpen[text] then
-			self.level = self.level + 1
-		end
-		return ret
-	end
+
+-- Main is down here.
+
+if #arg ~= 1 then
+	print "Must provide a file name."
+	os.exit(1)
 end
 
-local defaultHandler = function(self, text, lnum, cnum)
-	return self.processString(text)
-end
-
-kindHandler.__index = function(self, index)
-	return defaultHandler
-end
-
-setmetatable(kindHandler, kindHandler)
-
-kindHandler.whitespace = function(self, text, lnum, cnum)
-	if hasNewline(text) then
-		if self.needsNewline then
-			return "\n"
-		end
-		self.needsNewline = true
-		return ""
-	end
-	return " "
-end
-
-
-local ret = {}
-for kind, text, lnum, cnum in lxsh.lexers.lua.gmatch(orig) do
-	--print(string.format('%s: %q (%i:%i)', kind, text, lnum, cnum))
-	table.insert(ret, kindHandler[kind](kindhandler, text, lnum, cnum))
-end
-print(table.concat(ret))
-]]
-
+local f = assert(io.open(arg[1], 'r'))
+local orig = f:read("*all")
+f:close()
 print(processCode(orig))
