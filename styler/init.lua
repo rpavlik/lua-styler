@@ -1,5 +1,5 @@
 
-require "luarocks.loader"
+pcall(require,"luarocks.loader")
 require "lxsh"
 
 
