@@ -174,12 +174,10 @@ do -- addPadding
 			if padBoth[token] then
 				vverbose("Padding both:", token)
 				text = " " .. text .. " "
-			end
-			if padBefore[token] then
+			elseif padBefore[token] then
 				vverbose("Padding before:", token)
 				text = " " .. text
-			end
-			if padAfter[token] then
+			elseif padAfter[token] then
 				vverbose("Padding after:", token)
 				text = text .. " "
 			end
