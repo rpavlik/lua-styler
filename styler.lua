@@ -1,7 +1,8 @@
 
 pcall(require,"luarocks.loader")
 
-local success = pcall(require,"lxsh")
+-- This weird construct handles a bug in luarocks and/or lxsh's rockspec.
+local success = pcall(require, "lxsh")
 if not success then
 	require "lxsh.init"
 end
