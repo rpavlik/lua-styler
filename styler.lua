@@ -1,6 +1,10 @@
 
 pcall(require,"luarocks.loader")
-require "lxsh"
+
+local success = pcall(require,"lxsh")
+if not success then
+	require "lxsh.init"
+end
 
 
 local indent = function(level)
@@ -40,17 +44,11 @@ local blockClose = Set{
 
 local _M = {}
 
-function _M.processCode(text, verbose_print, vverbose_print)
+function _M.reindentBlocks(text, verbose, vverbose)
 	local level = 0
 	local startingNewline = true
 	local ret = {}
 
-	local verbose = verbose_print or function(...)
-		print(...)
-	end
-	local vverbose = vverbose_print or function(...)
-		verbose(...)
-	end
 
 	local function buffer(text)
 		vverbose(("Buffering %q"):format(text))
@@ -96,6 +94,25 @@ function _M.processCode(text, verbose_print, vverbose_print)
 		end
 	end
 	return table.concat(ret)
+end
+
+function _M.addPadding(text, verbose, vverbose)
+
+end
+
+function _M.processCode(text, verbose_print, vverbose_print)
+	local verbose = verbose_print or print
+	local vverbose = vverbose_print or verbose
+	
+	local config = {
+		"reindentBlocks"
+	}
+	
+	local ret = text
+	for _, filter in ipairs(config) do
+		ret = _M[filter](ret, verbose, vverbose)
+	end
+	
 end
 
 

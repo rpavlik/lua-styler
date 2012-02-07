@@ -17,12 +17,11 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    ["styler"] = "styler/init.lua"
+    ["styler"] = "styler.lua"
   },
   install = {
     bin = {
       "lua-styler.lua"
     }
-  },
-  copy_directories = { --[["samples", "doc", "tests" ]]},
+  }
 }
