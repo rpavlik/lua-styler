@@ -6,15 +6,54 @@ local makeBackup = true
 
 local donothing = function() end
 local vverbose_func = donothing
-local verbose_func = nil
+local verbose_func = donothing
+
+local script_verbose = print
+
+--[[ Options and Help ]]
+
+local script_info = [[
+Lua Styler - reformats Lua code.
+
+Usage: styler [options] filename(s)...
+
+]]
 
 local options = {
-	["--nobackup"] = function() makeBackup = false end,
-	["-vv"] = function() vverbose_func = nil end,
-	["-q"] = function() vverbose_func = donothing; verbose_func = donothing; end,
-
+	["--nobackup"] = {
+		help = "Do not create .bak files when re-styling a file.",
+		action = function() makeBackup = false end
+	},
+	["-v"] = {
+		help = "Enable verbose output from the styler procedure.",
+		action = function() verbose_func = print end
+	},
+	["-vv"] = {
+		help = "Enable very verbose output from the styler procedure (implies -v).",
+		action = function() verbose_func = print; vverbose_func = print end
+	},
+	["-q"] = {
+		help = "Silence all non-error output from the styler procedure and the main script.",
+		action = function() vverbose_func = donothing; verbose_func = donothing; script_verbose = donothing end
+	}
 }
 
+local showHelp = function()
+	print(script_info)
+	for flag, val in pairs(options) do
+		print("", flag, val.help)
+		print("")
+	end
+	os.exit(1)
+end
+
+options["-h"] = {
+	help = "Show this help information",
+	action = showHelp
+}
+options["--help"] = options["-h"]
+
+--[[ Process arguments ]]
 local inputFiles = {}
 for _, v in ipairs(arg) do
 	if options[v] ~= nil then
@@ -24,9 +63,9 @@ for _, v in ipairs(arg) do
 	end
 end
 
-
 if #inputFiles < 1 then
-	print "Must provide at least one file name."
+	io.stderr:write("Must provide at least one file name!\n\n")
+	showHelp()
 	os.exit(1)
 end
 
@@ -38,7 +77,7 @@ local function handleFile(fn)
 	local styledCode = styler.processCode(orig, verbose_func, vverbose_func)
 
 	if styledCode == orig then
-		print(fn, "Already cleanly styled!")
+		script_verbose(fn, "Already cleanly styled!")
 	else
 		if makeBackup then
 			local fbak = assert(io.open(fn .. ".bak", "w"))
@@ -48,7 +87,7 @@ local function handleFile(fn)
 		local f = assert(io.open(fn..".styled", 'w'))
 		f:write(styledCode)
 		f:close()
-		print(fn, "Style cleanup changes applied.")
+		script_verbose(fn, "Style cleanup changes applied.")
 	end
 end
 
