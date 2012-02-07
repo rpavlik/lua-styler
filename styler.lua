@@ -113,11 +113,16 @@ local padBoth = Set{
 }
 
 local padBefore = Set{
+	"end"
 }
 
 local padAfter = Set{
 	",",
 	";",
+	"if",
+	"then",
+	"else",
+	"elseif",
 }
 
 local function filterTokens(text, filter)
