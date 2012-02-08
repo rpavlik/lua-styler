@@ -143,7 +143,7 @@ do -- addPadding
 		"<=",
 		">=",
 		"+",
-		"-",
+		--"-", -- unary minus looks weird padded on both sides
 		"*",
 		"/",
 		"^",
