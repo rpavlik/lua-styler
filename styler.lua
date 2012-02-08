@@ -71,7 +71,8 @@ do -- block indenter/whitespace minimizer
 		"do",
 		"function",
 		"repeat",
-		"("
+		"(",
+		"[",
 	}
 
 	local blockClose = Set{
@@ -81,6 +82,7 @@ do -- block indenter/whitespace minimizer
 		"end",
 		"until",
 		")",
+		"]",
 	}
 
 	function _M.reindentBlocks(text, verbose, vverbose)
