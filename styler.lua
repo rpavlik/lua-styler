@@ -1,4 +1,3 @@
-
 pcall(require, "luarocks.loader")
 
 -- This weird construct handles a bug in luarocks and/or lxsh's rockspec.
@@ -154,17 +153,17 @@ do -- addPadding
 	}
 
 	local padBefore = Set{
-		"end"
+		--"end"
 	}
 
 	local padAfter = Set{
 		",",
 		";",
+		--[[
 		"if",
 		"then",
 		"else",
 		"elseif",
-		--[[
 		"not" -- buggy in current lxsh
 		]]
 	}
