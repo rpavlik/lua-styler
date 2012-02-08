@@ -87,12 +87,19 @@ do -- block indenter/whitespace minimizer
 
 	function _M.reindentBlocks(text, verbose, vverbose)
 		local level = 0
-		local startingNewline = true
 
 		local buffer
+		local peekBuffer
+		local getBufferSize
 
 		local function setup(common)
 			buffer = common.buffer
+			peekBuffer = common.peekBuffer
+			getBufferSize = common.getBufferSize
+		end
+
+		local function lastBufferedCharIsNewline()
+			return peekBuffer():sub(-1) == "\n" or getBufferSize() == 0
 		end
 
 		local function output(text)
@@ -100,17 +107,15 @@ do -- block indenter/whitespace minimizer
 				level = level - 1
 				verbose("Closing a block", text, level)
 			end
-			if not startingNewline then
-				buffer(text)
-			else
+			if lastBufferedCharIsNewline() then
 				buffer(indent(level))
-				buffer(text)
 			end
+
+			buffer(text)
 			if blockOpen[text] then
 				level = level + 1
 				verbose("Opening a block", text, level)
 			end
-			startingNewline = hasNewline(text) -- this catches comments which end with a newline, etc.
 		end
 
 		local function blockIndenter(self)
@@ -118,8 +123,7 @@ do -- block indenter/whitespace minimizer
 				if hasNewline(self.text) then
 					-- Extract and buffer all and only the newlines
 					buffer(self.text:gsub("[^\n]*(\n)[^\n]*", "%1"))
-					startingNewline = true
-				elseif not startingNewline then
+				elseif not lastBufferedCharIsNewline() then
 					output " "
 				end
 			else
